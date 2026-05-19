@@ -1,2 +1,7 @@
 node_modules/
 .env
+__pycache__/
+*.json
+!package.json
+!package-lock.json
+/test
