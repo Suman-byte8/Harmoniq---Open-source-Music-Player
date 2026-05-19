@@ -82,6 +82,26 @@ Because the best library for YouTube Music metadata (`ytmusicapi`) is written in
 
 
 
+## 3. Middleware (`src/middleware/`)
+
+
+
+To protect the backend from spam and bot abuse, we use standard Express middleware.
+
+
+
+- `rateLimiter.js`: Uses `express-rate-limit` to restrict each IP address to **100 requests per 15 minutes**.
+
+- **Proxy Trusting:** The app is configured to `trust proxy`, ensuring that the rate limiter accurately reads client IPs when deployed behind reverse proxies like Render or Railway.
+
+- **Headers:** All responses include standard `RateLimit-*` headers to inform clients of their remaining quota. *(Note: The `/api/health` endpoint is exempt from rate limiting to allow unlimited uptime pings).*
+
+
+
+---
+
+
+
 # 📡 API Routes & Documentation
 
 
