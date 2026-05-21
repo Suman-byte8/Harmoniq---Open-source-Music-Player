@@ -1,50 +1,50 @@
-# Welcome to your Expo app 👋
+# Harmoniq Music Player - Native App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+This is the React Native client for the Harmoniq Open Source Music Player, bootstrapped with React Native CLI and styled using NativeWind (Tailwind CSS).
 
-## Get started
+## Tech Stack
+- **Framework**: React Native
+- **Styling**: NativeWind (Tailwind CSS v3)
+- **Navigation**: React Navigation (To be added)
 
-1. Install dependencies
+## Getting Started
 
-   ```bash
-   npm install
-   ```
+> **Note**: Make sure you have completed the [React Native Environment Setup](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+### 1. Install Dependencies
+```sh
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Start Metro Bundler
+```sh
+npm start
+```
 
-## Learn more
+### 3. Run the App
 
-To learn more about developing your project with Expo, look at the following resources:
+Open a new terminal window and run:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+**Android:**
+```sh
+npm run android
+```
 
-## Join the community
+**iOS:**
+```sh
+npm run ios
+```
+*(Requires macOS and CocoaPods setup)*
 
-Join our community of developers creating universal apps.
+## Windows Build Notes (Path Limit Fix)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+If you encounter a `Filename longer than 260 characters` error while building on Windows, this has already been addressed in `android/app/build.gradle` by configuring CMake to use a shorter staging directory (`C:/tmp/harmoniq-cxx`). 
+
+If you still experience issues, consider enabling **Long Paths** in your Windows Registry or moving the project closer to the root of your drive (e.g., `C:/dev/harmoniq`).
+
+## Styling (Tailwind CSS)
+
+This project uses NativeWind v4 for styling.
+- Global styles are defined in `global.css`.
+- Tailwind configuration is located in `tailwind.config.js`.
+- You can use standard Tailwind classes in the `className` prop of React Native components.
