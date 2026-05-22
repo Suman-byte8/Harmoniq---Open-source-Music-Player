@@ -74,3 +74,8 @@ Screens are organized into feature folders inside `src/screens` for clearer sepa
 - `src/screens/SignUp/index.js`
 
 This keeps screen-specific logic, layout, and styles isolated from the app entry point.
+
+## Now Playing
+
+- The Now Playing screen is available at `src/screens/NowPlaying/NowPlayingScreen.jsx` and shows the album art, playback controls, progress, and utilities (lyrics, queue, share, save).
+- Tap the compact player bar at the bottom of the main screen to open the full Now Playing view.
