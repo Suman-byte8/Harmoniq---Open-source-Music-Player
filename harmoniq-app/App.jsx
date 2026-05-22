@@ -9,10 +9,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import SignUpScreen from './src/screens/SignUp/SignUpScreen';
+import OnboardingScreen from './src/screens/Onboarding';
+import SignUpScreen from './src/screens/SignUp';
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState('signup');
+  const [currentScreen, setCurrentScreen] = useState('onboarding');
   const [searchFocused, setSearchFocused] = useState(false);
   const [isPlaying, setIsPlaying] = useState(true);
 
@@ -21,6 +22,15 @@ function App() {
     36, 18, 12,
   ];
   const playedCutoff = 9;
+
+  if (currentScreen === 'onboarding') {
+    return (
+      <OnboardingScreen
+        onContinue={() => setCurrentScreen('signup')}
+        onSkip={() => setCurrentScreen('signup')}
+      />
+    );
+  }
 
   if (currentScreen === 'signup') {
     return <SignUpScreen onNavigateToLogin={() => setCurrentScreen('home')} />;
@@ -140,6 +150,188 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff8f7',
+  },
+  onboardingHeader: {
+    width: '100%',
+    paddingTop: 24,
+    paddingBottom: 16,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  brand: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#b80035',
+  },
+  skipText: {
+    color: '#7f5d65',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  onboardingMain: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  heroGraphic: {
+    width: 220,
+    height: 220,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  heroAccent: {
+    position: 'absolute',
+    width: 210,
+    height: 210,
+    borderRadius: 999,
+    backgroundColor: 'rgba(184,0,53,0.16)',
+    top: -18,
+    left: -18,
+  },
+  heroCircle: {
+    width: 170,
+    height: 170,
+    borderRadius: 999,
+    backgroundColor: '#ffe5e8',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#b80035',
+    shadowOffset: { width: 0, height: 18 },
+    shadowOpacity: 0.14,
+    shadowRadius: 40,
+    elevation: 8,
+  },
+  heroIcon: {
+    fontSize: 60,
+    color: '#b80035',
+  },
+  heroBadge: {
+    position: 'absolute',
+    right: 0,
+    bottom: 10,
+    width: 56,
+    height: 56,
+    borderRadius: 999,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#e11d48',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 24,
+    elevation: 4,
+  },
+  heroBadgeIcon: {
+    fontSize: 22,
+    color: '#b80035',
+  },
+  onboardingText: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  onboardingTitle: {
+    fontSize: 36,
+    lineHeight: 42,
+    fontWeight: '800',
+    color: '#211a1b',
+    textAlign: 'center',
+  },
+  highlight: {
+    color: '#b80035',
+  },
+  onboardingDescription: {
+    marginTop: 16,
+    fontSize: 14,
+    color: '#7f5d65',
+    textAlign: 'center',
+    lineHeight: 22,
+    maxWidth: 320,
+  },
+  featureGrid: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 20,
+  },
+  featureCard: {
+    flex: 1,
+    backgroundColor: '#fff2f4',
+    paddingVertical: 18,
+    paddingHorizontal: 14,
+    borderRadius: 24,
+    alignItems: 'center',
+    marginHorizontal: 6,
+  },
+  featureIcon: {
+    fontSize: 22,
+    color: '#b80035',
+    marginBottom: 10,
+  },
+  featureLabel: {
+    fontSize: 11,
+    color: '#7f5d65',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  indicatorRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  indicatorActive: {
+    width: 32,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: '#b80035',
+    marginHorizontal: 4,
+  },
+  indicator: {
+    width: 8,
+    height: 8,
+    borderRadius: 999,
+    backgroundColor: '#f3e5e6',
+    marginHorizontal: 4,
+  },
+  onboardingFooter: {
+    paddingHorizontal: 24,
+    paddingBottom: 24,
+  },
+  nextButton: {
+    width: '100%',
+    backgroundColor: '#b80035',
+    paddingVertical: 18,
+    borderRadius: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#b80035',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 24,
+    elevation: 6,
+  },
+  nextButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  footerLoginRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+  },
+  footerLoginText: {
+    fontSize: 13,
+    color: '#7f5d65',
+  },
+  footerLoginLink: {
+    fontSize: 13,
+    color: '#b80035',
+    fontWeight: '700',
   },
   scrollContent: {
     flexGrow: 1,
