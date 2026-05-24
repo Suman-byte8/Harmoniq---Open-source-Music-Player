@@ -8,39 +8,27 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-
-// --- PLACEHOLDER SCREENS ---
-const HomeScreen = () => (
-  <View style={styles.screen}>
-    <Text style={styles.screenText}>Home</Text>
-  </View>
-);
-const SearchScreen = () => (
-  <View style={styles.screen}>
-    <Text style={styles.screenText}>Search</Text>
-  </View>
-);
-const GenerateScreen = () => (
-  <View style={styles.screen}>
-    <Text style={styles.screenText}>Generate</Text>
-  </View>
-);
-const LibraryScreen = () => (
-  <View style={styles.screen}>
-    <Text style={styles.screenText}>Library</Text>
-  </View>
-);
-const ProfileScreen = () => (
-  <View style={styles.screen}>
-    <Text style={styles.screenText}>Profile</Text>
-  </View>
-);
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Foundation from 'react-native-vector-icons/Foundation';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import DeveloperScreen from './src/screens/Developer';
+import GenerateScreen from './src/screens/Generate';
+import HomeScreen from './src/screens/Home';
+import LibraryScreen from './src/screens/Library';
+import ProfileScreen from './src/screens/Profile';
+import SearchScreen from './src/screens/Search';
 
 // --- CUSTOM TAB BAR COMPONENT ---
 function CustomTabBar({ state, descriptors, navigation }) {
   return (
     <View style={styles.tabBarContainer}>
       {state.routes.map((route, index) => {
+        if (route.name === 'Developer') {
+          return null;
+        }
+
         const { options } = descriptors[route.key];
         const label =
           options.tabBarLabel !== undefined ? options.tabBarLabel : route.name;
@@ -59,23 +47,60 @@ function CustomTabBar({ state, descriptors, navigation }) {
           }
         };
 
-        // Render simple typographic icons for now (You can replace with SVG later)
         const getIcon = routeName => {
+          const color = isFocused ? '#b80035' : '#5c3f40';
+          const size = 24;
           switch (route.name) {
             case 'Home':
-              return '🏠';
+              return (
+                <Foundation
+                  name="home"
+                  color={color}
+                  size={size}
+                  style={styles.tabIcon}
+                />
+              );
             case 'Search':
-              return '🔍';
+              return (
+                <MaterialIcons
+                  name="search"
+                  color={color}
+                  size={size}
+                  style={styles.tabIcon}
+                />
+              );
             case 'Generate':
-              return '⊕';
+              return (
+                <MaterialCommunityIcons
+                  name="star-four-points"
+                  color={color}
+                  size={size}
+                  style={styles.tabIcon}
+                />
+              );
             case 'Library':
-              return '🎵';
+              return (
+                <Ionicons
+                  name="musical-note"
+                  color={color}
+                  size={size}
+                  style={styles.tabIcon}
+                />
+              );
             case 'Profile':
-              return '👤';
+              return (
+                <FontAwesome
+                  name="user-circle-o"
+                  color={color}
+                  size={size}
+                  style={styles.tabIcon}
+                />
+              );
             default:
-              return '•';
+              return <Text style={[styles.tabIcon, { color }]}>{'•'}</Text>;
           }
         };
+        const displayLabel = label === 'Generate' ? 'Create' : label;
 
         return (
           <TouchableOpacity
@@ -85,11 +110,13 @@ function CustomTabBar({ state, descriptors, navigation }) {
             style={styles.tabItemWrapper}
           >
             <View style={[styles.tabItem, isFocused && styles.tabItemFocused]}>
-              <Text style={[styles.tabIcon, isFocused && styles.textFocused]}>
-                {getIcon(route.name)}
-              </Text>
-              <Text style={[styles.tabLabel, isFocused && styles.textFocused]}>
-                {label.toUpperCase()}
+              {getIcon(route.name)}
+              <Text
+                style={[styles.tabLabel, isFocused && styles.textFocused]}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {displayLabel.toUpperCase()}
               </Text>
             </View>
           </TouchableOpacity>
@@ -101,15 +128,16 @@ function CustomTabBar({ state, descriptors, navigation }) {
 
 // --- INITIALIZE NAVIGATOR ---
 const Tab = createBottomTabNavigator();
+const renderTabBar = props => <CustomTabBar {...props} />;
 
 export default function App() {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFF1F2' }}>
+    <SafeAreaView style={styles.rootContainer}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF1F2" />
 
       <NavigationContainer>
         <Tab.Navigator
-          tabBar={props => <CustomTabBar {...props} />}
+          tabBar={renderTabBar}
           screenOptions={{
             headerShown: false, // Hides the default top header
           }}
@@ -119,6 +147,11 @@ export default function App() {
           <Tab.Screen name="Generate" component={GenerateScreen} />
           <Tab.Screen name="Library" component={LibraryScreen} />
           <Tab.Screen name="Profile" component={ProfileScreen} />
+          <Tab.Screen
+            name="Developer"
+            component={DeveloperScreen}
+            options={{ tabBarButton: () => null }}
+          />
         </Tab.Navigator>
       </NavigationContainer>
     </SafeAreaView>
@@ -127,6 +160,11 @@ export default function App() {
 
 // --- STYLES (Matching your Rosewood Palette) ---
 const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    backgroundColor: '#FFF1F2',
+  },
+
   /* Screen Styles */
   screen: {
     flex: 1,
@@ -183,6 +221,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#A1A1AA', // Gray for inactive
     letterSpacing: 0.5,
+    flexWrap: 'nowrap',
+    maxWidth: 72,
   },
   textFocused: {
     color: '#E11D48', // Primary Rosewood color for active icon/text
