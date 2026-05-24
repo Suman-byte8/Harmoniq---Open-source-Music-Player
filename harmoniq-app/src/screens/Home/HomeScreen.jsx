@@ -419,79 +419,90 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     paddingBottom: 4,
   },
+  // --- Replace these styles in your HomeScreen ---
+
   trendingRow: {
-    flexDirection: 'row',
+    flexDirection: 'column', // Changed from 'row' to stack them beautifully
   },
   featuredCard: {
-    flex: 1.7,
-    minHeight: 340,
-    borderRadius: 28,
+    width: '100%',
+    height: 220, // Much better height (was 340)
+    borderRadius: 24,
     overflow: 'hidden',
     backgroundColor: '#000',
+    marginBottom: 20, // Space between banner and mini cards
+    // Added premium shadow
+    shadowColor: '#E11D48',
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 8,
   },
   featuredImage: {
     ...StyleSheet.absoluteFillObject,
   },
   featuredOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0,0,0,0.36)',
+    backgroundColor: 'rgba(0,0,0,0.3)', // Slightly lighter for a premium look
   },
   featuredContent: {
     position: 'absolute',
     left: 20,
     bottom: 20,
-    right: 20,
+    right: 80, // Prevent text from hitting the play button
   },
   featuredBadge: {
     alignSelf: 'flex-start',
-    backgroundColor: 'rgba(184,0,53,0.92)',
+    backgroundColor: '#E11D48', // Using our exact primary color
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    marginBottom: 14,
+    marginBottom: 10,
   },
   featuredBadgeText: {
     color: '#ffffff',
     fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.8,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   featuredTitle: {
     color: '#ffffff',
-    fontSize: 28,
-    fontWeight: '900',
-    marginBottom: 6,
+    fontSize: 26,
+    fontWeight: '800',
+    marginBottom: 4,
   },
   featuredSubtitle: {
-    color: '#f8f1f0',
+    color: '#FFF1F2',
     fontSize: 14,
     fontWeight: '500',
+    opacity: 0.9,
   },
   featuredPlayButton: {
     position: 'absolute',
     bottom: 20,
     right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: '#b80035',
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: '#E11D48',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#b80035',
-    shadowOffset: { width: 0, height: 14 },
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 6,
+    shadowRadius: 10,
+    elevation: 5,
   },
   featuredPlayIcon: {
     color: '#ffffff',
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
+    marginLeft: 4, // Optical alignment for the triangle
   },
   miniList: {
-    flex: 1,
-    justifyContent: 'space-between',
-    marginLeft: 14,
+    width: '100%', // Take up full width now!
+    flexDirection: 'column',
   },
   sectionHeaderRow: {
     flexDirection: 'row',
