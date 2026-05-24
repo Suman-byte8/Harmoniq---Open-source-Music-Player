@@ -13,7 +13,9 @@ export default function SearchResultCard({ track }) {
         </Text>
         {track.album ? <Text style={styles.details}>{track.album}</Text> : null}
       </View>
-      <Text style={styles.duration}>{track.duration ? track.duration : ''}</Text>
+      <Text style={styles.duration}>
+        {track.duration ? track.duration : ''}
+      </Text>
     </TouchableOpacity>
   );
 }

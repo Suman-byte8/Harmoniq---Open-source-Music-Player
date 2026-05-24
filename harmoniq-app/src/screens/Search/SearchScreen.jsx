@@ -11,8 +11,8 @@ import {
     View,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
-import { clearSearchResults, searchSongsAsync } from '../../store/searchSlice';
 import SearchResultCard from '../../components/search/SearchResultCard';
+import { clearSearchResults, searchSongsAsync } from '../../store/searchSlice';
 
 const RECENT_SEARCHES_KEY = 'harmoniq_recent_searches';
 const defaultRecentSearches = [
@@ -202,7 +202,9 @@ export default function SearchScreen() {
             ) : error ? (
               <Text style={styles.feedbackText}>Unable to load results.</Text>
             ) : results.length === 0 ? (
-              <Text style={styles.feedbackText}>No songs found. Try a different keyword.</Text>
+              <Text style={styles.feedbackText}>
+                No songs found. Try a different keyword.
+              </Text>
             ) : (
               <View style={styles.resultsGrid}>
                 {results.map(item => (
@@ -219,7 +221,10 @@ export default function SearchScreen() {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionLabel}>Recent</Text>
-            <TouchableOpacity onPress={clearAllRecentSearches} activeOpacity={0.8}>
+            <TouchableOpacity
+              onPress={clearAllRecentSearches}
+              activeOpacity={0.8}
+            >
               <Text style={styles.clearText}>Clear All</Text>
             </TouchableOpacity>
           </View>
