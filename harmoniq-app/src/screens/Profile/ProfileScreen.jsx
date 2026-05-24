@@ -107,8 +107,8 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Know the Developer</Text>
           <Text style={styles.sectionBody}>
-            Learn more about the creator behind SoundForge AI and the vision
-            that drives every feature.
+            Learn more about the creator behind Harmoniq AI and the vision that
+            drives every feature.
           </Text>
           <TouchableOpacity
             style={styles.developerCard}
@@ -117,7 +117,7 @@ export default function ProfileScreen({ navigation }) {
           >
             <Text style={styles.developerCardTitle}>Alex River</Text>
             <Text style={styles.developerCardSubtitle}>
-              Founder, lead architect, and the voice behind SoundForge AI.
+              Founder, lead architect, and the voice behind Harmoniq AI.
             </Text>
             <Text style={styles.developerCardLink}>View developer profile</Text>
           </TouchableOpacity>
@@ -203,7 +203,7 @@ export default function ProfileScreen({ navigation }) {
             <Text style={styles.proIcon}>⭐</Text>
             <Text style={styles.proTitle}>Open Source</Text>
             <Text style={styles.proText}>
-              SoundForge AI is free and open source. If you find value in our
+              Harmoniq AI is free and open source. If you find value in our
               tools, consider supporting the mission.
             </Text>
             <TouchableOpacity style={styles.linkButton} activeOpacity={0.85}>

@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export function Logo() {
   return (
     <View style={styles.logoContainer}>
-      <Text style={styles.logoText}>SoundForge</Text>
+      <Text style={styles.logoText}>Harmoniq</Text>
     </View>
   );
 }

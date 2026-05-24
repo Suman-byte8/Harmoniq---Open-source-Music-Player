@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Provider } from 'react-redux';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import Foundation from 'react-native-vector-icons/Foundation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -19,6 +20,7 @@ import HomeScreen from './src/screens/Home';
 import LibraryScreen from './src/screens/Library';
 import ProfileScreen from './src/screens/Profile';
 import SearchScreen from './src/screens/Search';
+import { store } from './src/store/store';
 
 // --- CUSTOM TAB BAR COMPONENT ---
 function CustomTabBar({ state, descriptors, navigation }) {
@@ -135,25 +137,27 @@ export default function App() {
     <SafeAreaView style={styles.rootContainer}>
       <StatusBar barStyle="dark-content" backgroundColor="#FFF1F2" />
 
-      <NavigationContainer>
-        <Tab.Navigator
-          tabBar={renderTabBar}
-          screenOptions={{
-            headerShown: false, // Hides the default top header
-          }}
-        >
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Search" component={SearchScreen} />
-          <Tab.Screen name="Generate" component={GenerateScreen} />
-          <Tab.Screen name="Library" component={LibraryScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
-          <Tab.Screen
-            name="Developer"
-            component={DeveloperScreen}
-            options={{ tabBarButton: () => null }}
-          />
-        </Tab.Navigator>
-      </NavigationContainer>
+      <Provider store={store}>
+        <NavigationContainer>
+          <Tab.Navigator
+            tabBar={renderTabBar}
+            screenOptions={{
+              headerShown: false, // Hides the default top header
+            }}
+          >
+            <Tab.Screen name="Home" component={HomeScreen} />
+            <Tab.Screen name="Search" component={SearchScreen} />
+            <Tab.Screen name="Generate" component={GenerateScreen} />
+            <Tab.Screen name="Library" component={LibraryScreen} />
+            <Tab.Screen name="Profile" component={ProfileScreen} />
+            <Tab.Screen
+              name="Developer"
+              component={DeveloperScreen}
+              options={{ tabBarButton: () => null }}
+            />
+          </Tab.Navigator>
+        </NavigationContainer>
+      </Provider>
     </SafeAreaView>
   );
 }

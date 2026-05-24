@@ -15,7 +15,7 @@ export function OnboardingScreen({ onContinue, onSkip = () => {} }) {
       <StatusBar barStyle="dark-content" backgroundColor="#fff8f7" />
 
       <View style={styles.header}>
-        <Text style={styles.brand}>SoundForge</Text>
+        <Text style={styles.brand}>Harmoniq</Text>
         <TouchableOpacity onPress={onSkip} activeOpacity={0.7}>
           <Text style={styles.skipText}>Skip</Text>
         </TouchableOpacity>

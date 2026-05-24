@@ -29,7 +29,7 @@ const LibraryScreen = () => {
     {
       id: 2,
       title: 'Neural Echoes',
-      artist: 'SoundForge AI • 2:12',
+      artist: 'Harmoniq AI • 2:12',
       thumbnail: 'https://via.placeholder.com/60',
       isAI: true,
     },
@@ -43,7 +43,7 @@ const LibraryScreen = () => {
     {
       id: 4,
       title: 'Sublime Synthesis',
-      artist: 'SoundForge AI • 3:01',
+      artist: 'Harmoniq AI • 3:01',
       thumbnail: 'https://via.placeholder.com/60',
       isAI: true,
     },

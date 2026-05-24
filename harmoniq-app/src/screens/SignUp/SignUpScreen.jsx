@@ -89,7 +89,7 @@ export function SignUpScreen({ onNavigateToLogin = () => {} }) {
               <Input
                 label="Email Address"
                 icon="mail"
-                placeholder="alex@soundforge.ai"
+                placeholder="alex@harmoniq.ai"
                 keyboardType="email-address"
                 value={email}
                 onChangeText={setEmail}

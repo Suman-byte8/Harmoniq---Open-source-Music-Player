@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
     ImageBackground,
     SafeAreaView,
@@ -7,10 +8,14 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View
+    View,
 } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { clearSearchResults, searchSongsAsync } from '../../store/searchSlice';
+import SearchResultCard from '../../components/search/SearchResultCard';
 
-const recentSearches = [
+const RECENT_SEARCHES_KEY = 'harmoniq_recent_searches';
+const defaultRecentSearches = [
   'Cyberpunk Ambient',
   'Chillhop Beats',
   'Symphonic Metal AI',
@@ -66,14 +71,83 @@ const placeholderRows = [
 
 export default function SearchScreen() {
   const [query, setQuery] = useState('');
+  const [recentSearches, setRecentSearches] = useState(defaultRecentSearches);
 
   const filteredRecent = useMemo(
     () =>
       recentSearches.filter(item =>
         item.toLowerCase().includes(query.toLowerCase()),
       ),
-    [query],
+    [recentSearches, query],
   );
+
+  const dispatch = useDispatch();
+  const { results, status, error } = useSelector(state => state.search);
+
+  const loadRecentSearches = async () => {
+    try {
+      const stored = await AsyncStorage.getItem(RECENT_SEARCHES_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length) {
+          setRecentSearches(parsed);
+          return;
+        }
+      }
+      setRecentSearches(defaultRecentSearches);
+    } catch (err) {
+      setRecentSearches(defaultRecentSearches);
+    }
+  };
+
+  const persistRecentSearches = async searches => {
+    try {
+      await AsyncStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(searches));
+    } catch (err) {
+      console.warn('Failed to save recent searches', err.message);
+    }
+  };
+
+  const addRecentSearch = useCallback(
+    async term => {
+      const trimmed = term.trim();
+      if (!trimmed) return;
+
+      const updated = [
+        trimmed,
+        ...recentSearches.filter(
+          item => item.toLowerCase() !== trimmed.toLowerCase(),
+        ),
+      ];
+      const limited = updated.slice(0, 5);
+      setRecentSearches(limited);
+      persistRecentSearches(limited);
+    },
+    [recentSearches],
+  );
+
+  const clearAllRecentSearches = async () => {
+    setRecentSearches([]);
+    await AsyncStorage.removeItem(RECENT_SEARCHES_KEY);
+  };
+
+  useEffect(() => {
+    loadRecentSearches();
+  }, []);
+
+  useEffect(() => {
+    if (!query.trim()) {
+      dispatch(clearSearchResults());
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      dispatch(searchSongsAsync(query.trim()));
+      addRecentSearch(query.trim());
+    }, 450);
+
+    return () => clearTimeout(timer);
+  }, [dispatch, query, addRecentSearch]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -86,7 +160,7 @@ export default function SearchScreen() {
             <TouchableOpacity style={styles.circleButton} activeOpacity={0.8}>
               <Text style={styles.icon}>☰</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>SoundForge AI</Text>
+            <Text style={styles.title}>Harmoniq AI</Text>
           </View>
           <TouchableOpacity style={styles.circleButton} activeOpacity={0.8}>
             <Text style={styles.icon}>🔔</Text>
@@ -99,7 +173,7 @@ export default function SearchScreen() {
             <TextInput
               value={query}
               onChangeText={setQuery}
-              placeholder="Search for sounds, artists, or AI styles..."
+              placeholder="Search for songs, artists, or AI styles..."
               placeholderTextColor="#7b5a66"
               style={styles.searchInput}
             />
@@ -118,10 +192,34 @@ export default function SearchScreen() {
           </View>
         </View>
 
+        {query.trim().length > 0 ? (
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionLabel}>Search Results</Text>
+            </View>
+            {status === 'loading' ? (
+              <Text style={styles.feedbackText}>Searching for songs…</Text>
+            ) : error ? (
+              <Text style={styles.feedbackText}>Unable to load results.</Text>
+            ) : results.length === 0 ? (
+              <Text style={styles.feedbackText}>No songs found. Try a different keyword.</Text>
+            ) : (
+              <View style={styles.resultsGrid}>
+                {results.map(item => (
+                  <SearchResultCard
+                    key={item.videoId || item.title}
+                    track={item}
+                  />
+                ))}
+              </View>
+            )}
+          </View>
+        ) : null}
+
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionLabel}>Recent</Text>
-            <TouchableOpacity>
+            <TouchableOpacity onPress={clearAllRecentSearches} activeOpacity={0.8}>
               <Text style={styles.clearText}>Clear All</Text>
             </TouchableOpacity>
           </View>
@@ -131,6 +229,7 @@ export default function SearchScreen() {
                 key={item}
                 style={styles.recentItem}
                 activeOpacity={0.8}
+                onPress={() => setQuery(item)}
               >
                 <Text style={styles.recentIcon}>🕘</Text>
                 <Text style={styles.recentText}>{item}</Text>
@@ -374,6 +473,15 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#5c3f40',
     fontWeight: '600',
+  },
+  resultsGrid: {
+    width: '100%',
+  },
+  feedbackText: {
+    fontSize: 14,
+    color: '#5c3f40',
+    marginBottom: 14,
+    paddingHorizontal: 4,
   },
   tagRow: {
     flexDirection: 'row',

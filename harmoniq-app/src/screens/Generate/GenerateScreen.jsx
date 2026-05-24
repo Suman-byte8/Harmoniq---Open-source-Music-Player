@@ -20,7 +20,7 @@ export default function GenerateScreen() {
             <TouchableOpacity style={styles.iconButton} activeOpacity={0.85}>
               <Text style={styles.iconText}>☰</Text>
             </TouchableOpacity>
-            <Text style={styles.title}>SoundForge AI</Text>
+            <Text style={styles.title}>Harmoniq AI</Text>
           </View>
           <TouchableOpacity style={styles.iconButton} activeOpacity={0.85}>
             <Text style={styles.iconText}>🔔</Text>
