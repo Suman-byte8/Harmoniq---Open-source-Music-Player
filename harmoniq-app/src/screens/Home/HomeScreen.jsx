@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from 'react';
 import {
     Image,
     SafeAreaView,
@@ -7,14 +8,15 @@ import {
     TouchableOpacity,
     View,
 } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
 import ActionChip from '../../components/home/ActionChip';
 import ArtistAvatar from '../../components/home/ArtistAvatar';
 import ContinueCard from '../../components/home/ContinueCard';
 import GenreTile from '../../components/home/GenreTile';
 import TrendingMiniCard from '../../components/home/TrendingMiniCard';
+import { fetchHomeData } from '../../store/homeSlice';
 
 const quickActions = [
-  { id: 'ai', icon: '✨', label: 'AI Generate', active: true },
   { id: 'trending', icon: '📈', label: 'Trending' },
   { id: 'radio', icon: '📻', label: 'Radio' },
   { id: 'new', icon: '🌟', label: 'New Hits' },
@@ -151,7 +153,112 @@ const genres = [
   { id: 'g4', title: 'Deep Bass', icon: '🔊', colors: ['#5c3f40', '#211a1b'] },
 ];
 
+const formatDuration = seconds => {
+  if (seconds == null) return '';
+  const mins = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
+};
+
+const truncate = (text, maxLength) => {
+  if (typeof text !== 'string') return text;
+  return text.length > maxLength ? `${text.slice(0, maxLength)}...` : text;
+};
+
 export default function HomeScreen() {
+  const dispatch = useDispatch();
+  const {
+    continueListening: continueTracks,
+    trending,
+    madeForYou,
+    newHits,
+    status,
+  } = useSelector(state => state.home);
+  const [activeTab, setActiveTab] = useState('trending');
+
+  useEffect(() => {
+    dispatch(fetchHomeData());
+  }, [dispatch]);
+
+  const activeTracks = useMemo(
+    () => (activeTab === 'new' ? newHits : trending),
+    [activeTab, newHits, trending],
+  );
+  const featuredTrack = activeTracks[0];
+  const isRadioTab = activeTab === 'radio';
+
+  const trendingPreview = useMemo(
+    () =>
+      activeTracks.length
+        ? activeTracks.slice(1, 4).map(track => ({
+            id: track.videoId || track.title,
+            title: track.title,
+            subtitle: track.artist,
+            image: track.thumbnail,
+          }))
+        : trendingItems,
+    [activeTracks],
+  );
+
+  const continueItems = useMemo(
+    () => (continueTracks.length ? continueTracks : continueListening),
+    [continueTracks],
+  );
+
+  const recommendedList = useMemo(
+    () =>
+      madeForYou.length
+        ? madeForYou.map((item, index) => ({
+            id: item.videoId || item.title,
+            rank: `${(index + 1).toString().padStart(2, '0')}`,
+            title: truncate(item.title, 24),
+            subtitle: truncate(
+              item.artist || item.album || 'Recommended for you',
+              24,
+            ),
+            image: item.thumbnail,
+            duration: formatDuration(item.duration),
+          }))
+        : recommended,
+    [madeForYou],
+  );
+
+  const artistList = useMemo(
+    () =>
+      trending.length
+        ? trending.reduce((acc, track) => {
+            if (acc.length >= 5) return acc;
+            if (!acc.some(artist => artist.name === track.artist)) {
+              acc.push({
+                id: track.artistId || track.artist,
+                name: truncate(track.artist, 18),
+                verified: true,
+                image: track.thumbnail,
+              });
+            }
+            return acc;
+          }, [])
+        : artists,
+    [trending],
+  );
+
+  const displayFeatured = useMemo(
+    () =>
+      featuredTrack
+        ? {
+            title: featuredTrack.title,
+            subtitle: featuredTrack.artist,
+            image: featuredTrack.thumbnail,
+          }
+        : {
+            title: 'Digital Alchemy',
+            subtitle: 'The Synthetix feat. Echo-7',
+            image:
+              'https://lh3.googleusercontent.com/aida-public/AB6AXuBVH9bLeJfzeK3i4EQPUJdXb23zTYa6BjW3C51KsfDBgKmIIJSH6hArPD0_Q_Np1U4qOifcpNdne8kxKi-F6khND8i9M0dljPq_eLlm1NWjHBtbm14uJ7Cf8HsGT09_reV4cR1n8e9Vtj-1Qu0zSZPFbYUXzPjiy9-vP0-dGKiGzbLkwg33foHU2oJgGRt2PKCJMkWcQTTNJ1e_x0fkz7b4kbuzIByj9qt0-pWkE2A7e1VRjrlANofVN53ANnWX7jpCIXq9f3LX',
+          },
+    [featuredTrack],
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView
@@ -178,16 +285,6 @@ export default function HomeScreen() {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.searchBar} activeOpacity={0.8}>
-          <Text style={styles.searchIcon}>🔎</Text>
-          <Text style={styles.searchText}>
-            Search for songs, artists, or AI prompts...
-          </Text>
-          <View style={styles.shortcutPill}>
-            <Text style={styles.shortcutText}>⌘ K</Text>
-          </View>
-        </TouchableOpacity>
-
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -199,7 +296,8 @@ export default function HomeScreen() {
               key={action.id}
               icon={action.icon}
               label={action.label}
-              active={action.active}
+              active={activeTab === action.id}
+              onPress={() => setActiveTab(action.id)}
             />
           ))}
         </ScrollView>
@@ -211,45 +309,54 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.cardRow}
           >
-            {continueListening.map(track => (
+            {continueItems.map(track => (
               <ContinueCard key={track.id} track={track} />
             ))}
           </ScrollView>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Trending Now</Text>
-          <View style={styles.trendingRow}>
-            <View style={styles.featuredCard}>
-              <Image
-                source={{
-                  uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBVH9bLeJfzeK3i4EQPUJdXb23zTYa6BjW3C51KsfDBgKmIIJSH6hArPD0_Q_Np1U4qOifcpNdne8kxKi-F6khND8i9M0dljPq_eLlm1NWjHBtbm14uJ7Cf8HsGT09_reV4cR1n8e9Vtj-1Qu0zSZPFbYUXzPjiy9-vP0-dGKiGzbLkwg33foHU2oJgGRt2PKCJMkWcQTTNJ1e_x0fkz7b4kbuzIByj9qt0-pWkE2A7e1VRjrlANofVN53ANnWX7jpCIXq9f3LX',
-                }}
-                style={styles.featuredImage}
-              />
-              <View style={styles.featuredOverlay} />
-              <View style={styles.featuredContent}>
-                <View style={styles.featuredBadge}>
-                  <Text style={styles.featuredBadgeText}>#1 Globally</Text>
+          <Text style={styles.sectionTitle}>
+            {isRadioTab ? 'Radio' : activeTab === 'new' ? 'New Hits' : 'Trending Now'}
+          </Text>
+          {isRadioTab ? (
+            <View style={styles.radioPlaceholder}>
+              <Text style={styles.radioPlaceholderTitle}>Radio is coming soon.</Text>
+              <Text style={styles.radioPlaceholderText}>
+                We're keeping the station reserved while we build it.
+                Explore Trending or New Hits for now.
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.trendingRow}>
+              <View style={styles.featuredCard}>
+                <Image
+                  source={{ uri: displayFeatured.image }}
+                  style={styles.featuredImage}
+                />
+                <View style={styles.featuredOverlay} />
+                <View style={styles.featuredContent}>
+                  <View style={styles.featuredBadge}>
+                    <Text style={styles.featuredBadgeText}>#1 Globally</Text>
+                  </View>
+                  <Text style={styles.featuredTitle}>
+                    {displayFeatured.title}
+                  </Text>
                 </View>
-                <Text style={styles.featuredTitle}>Digital Alchemy</Text>
-                <Text style={styles.featuredSubtitle}>
-                  The Synthetix feat. Echo-7
-                </Text>
+                <TouchableOpacity
+                  style={styles.featuredPlayButton}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.featuredPlayIcon}>▶</Text>
+                </TouchableOpacity>
               </View>
-              <TouchableOpacity
-                style={styles.featuredPlayButton}
-                activeOpacity={0.8}
-              >
-                <Text style={styles.featuredPlayIcon}>▶</Text>
-              </TouchableOpacity>
+              <View style={styles.miniList}>
+                {trendingPreview.map(item => (
+                  <TrendingMiniCard key={item.id} item={item} />
+                ))}
+              </View>
             </View>
-            <View style={styles.miniList}>
-              {trendingItems.map(item => (
-                <TrendingMiniCard key={item.id} item={item} />
-              ))}
-            </View>
-          </View>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -260,7 +367,7 @@ export default function HomeScreen() {
             </TouchableOpacity>
           </View>
           <View style={styles.recommendationCard}>
-            {recommended.map(item => (
+            {recommendedList.map(item => (
               <TouchableOpacity
                 key={item.id}
                 style={styles.recommendationRow}
@@ -296,7 +403,7 @@ export default function HomeScreen() {
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={styles.artistRow}
           >
-            {artists.map(artist => (
+            {artistList.map(artist => (
               <ArtistAvatar key={artist.id} artist={artist} />
             ))}
           </ScrollView>
@@ -477,6 +584,25 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     opacity: 0.9,
+  },
+  radioPlaceholder: {
+    borderRadius: 24,
+    backgroundColor: '#fff3f4',
+    padding: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioPlaceholderTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#211a1b',
+    marginBottom: 10,
+  },
+  radioPlaceholderText: {
+    fontSize: 14,
+    color: '#6b5563',
+    textAlign: 'center',
+    lineHeight: 20,
   },
   featuredPlayButton: {
     position: 'absolute',
