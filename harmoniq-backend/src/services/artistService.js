@@ -1,24 +1,13 @@
-const { execFile } = require("child_process");
-const util = require("util");
 const path = require("path");
+const { runPythonJson } = require("../utils/run");
 
-const execFilePromise = util.promisify(execFile);
+const SCRIPT = path.join(__dirname, "../../python/artist.py");
 
-async function getArtist(artistId) {
-  try {
-    const scriptPath = path.join(__dirname, "../../python/artist.py");
-
-    const { stdout } = await execFilePromise("python", [scriptPath, artistId], {
-      maxBuffer: 1024 * 1024 * 5,
-    });
-
-    return JSON.parse(stdout.trim());
-  } catch (error) {
-    console.error("Artist service error:", error.message);
-    throw new Error("Failed to fetch artist");
-  }
+// Resolves to null when no artist matches.
+async function getArtist(name) {
+  const result = await runPythonJson(SCRIPT, [name]);
+  if (result.error) throw new Error(result.error);
+  return result.artistId ? result : null;
 }
 
-module.exports = {
-  getArtist,
-};
+module.exports = { getArtist };

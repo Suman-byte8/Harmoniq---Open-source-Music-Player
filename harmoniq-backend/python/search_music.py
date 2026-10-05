@@ -19,12 +19,12 @@ def main():
         formatted.append({
             "videoId": item.get("videoId"),
             "title": item.get("title"),
-            "artist": item.get("artists", [{}])[0].get("name", "Unknown"),
-            "artistId": item.get("artists", [{}])[0].get("id"),
+            "artist": (item.get("artists") or [{}])[0].get("name", "Unknown"),
+            "artistId": (item.get("artists") or [{}])[0].get("id"),
             "album": item.get("album", {}).get("name") if item.get("album") else None,
             "albumId": item.get("album", {}).get("id") if item.get("album") else None,
             "duration": item.get("duration_seconds"),
-            "thumbnail": item.get("thumbnails", [{}])[-1].get("url"),
+            "thumbnail": (item.get("thumbnails") or [{}])[-1].get("url"),
             "isExplicit": item.get("isExplicit", False)
         })
 

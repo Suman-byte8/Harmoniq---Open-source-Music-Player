@@ -26,9 +26,9 @@ def main():
                 formatted.append({
                     "videoId": video_id,
                     "title": item.get("title"),
-                    "artist": item.get("artists", [{}])[0].get("name", "Unknown"),
-                    "artistId": item.get("artists", [{}])[0].get("id"),
-                    "thumbnail": item.get("thumbnails", [{}])[-1].get("url"),
+                    "artist": (item.get("artists") or [{}])[0].get("name", "Unknown"),
+                    "artistId": (item.get("artists") or [{}])[0].get("id"),
+                    "thumbnail": (item.get("thumbnails") or [{}])[-1].get("url"),
                     "duration": item.get("duration_seconds"),
                 })
 

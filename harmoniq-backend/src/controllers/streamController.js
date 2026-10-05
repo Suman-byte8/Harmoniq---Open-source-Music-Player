@@ -1,44 +1,18 @@
-const cache = require('../config/cache');
-const { getAudioStream } = require('../services/ytdlpService');
-
-const STREAM_TTL = 4 * 60 * 60; // 4 hours
+const cached = require("../utils/cached");
+const { videoIdParam } = require("../utils/validate");
+const {
+  getAudioStream,
+  streamTtlSeconds,
+  streamExpiry,
+} = require("../services/ytdlpService");
 
 exports.getStream = async (req, res) => {
-  try {
-    const { videoId } = req.params;
-
-    if (!videoId) {
-      return res.status(400).json({
-        success: false,
-        error: "videoId is required",
-      });
-    }
-
-    const cacheKey = `stream:${videoId}`;
-    const cached = cache.get(cacheKey);
-
-    if (cached) {
-      return res.json({
-        success: true,
-        data: { url: cached },
-        cached: true,
-      });
-    }
-
-    const streamUrl = await getAudioStream(videoId);
-
-    cache.set(cacheKey, streamUrl, STREAM_TTL);
-
-    res.json({
-      success: true,
-      data: { url: streamUrl },
-      cached: false,
-    });
-  } catch (error) {
-    console.error("Stream error:", error.message);
-    res.status(500).json({
-      success: false,
-      error: "Failed to get stream URL",
-    });
-  }
+  const videoId = videoIdParam(req.params.videoId);
+  const { value: url, cached: hit } = await cached(
+    `stream:${videoId}`,
+    (u) => streamTtlSeconds(u),
+    () => getAudioStream(videoId),
+  );
+  // Clients should re-request this endpoint if playback fails (403/410) or after expiresAt.
+  res.json({ success: true, data: { url, expiresAt: streamExpiry(url) }, cached: hit });
 };

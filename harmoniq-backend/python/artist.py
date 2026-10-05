@@ -23,7 +23,7 @@ def main():
     formatted = {
         "artistId": artist.get("browseId"),
         "name": artist.get("artist"),
-        "thumbnail": artist.get("thumbnails", [{}])[-1].get("url"),
+        "thumbnail": (artist.get("thumbnails") or [{}])[-1].get("url"),
         "topSongs": [],
         "albums": []
     }
@@ -35,7 +35,7 @@ def main():
         formatted["topSongs"].append({
             "videoId": item.get("videoId"),
             "title": item.get("title"),
-            "thumbnail": item.get("thumbnails", [{}])[-1].get("url"),
+            "thumbnail": (item.get("thumbnails") or [{}])[-1].get("url"),
             "duration": item.get("duration_seconds"),
         })
 
@@ -47,7 +47,7 @@ def main():
             "albumId": album.get("browseId"),
             "title": album.get("title"),
             "year": album.get("year"),
-            "thumbnail": album.get("thumbnails", [{}])[-1].get("url"),
+            "thumbnail": (album.get("thumbnails") or [{}])[-1].get("url"),
         })
 
     print(json.dumps(formatted))

@@ -1,22 +1,10 @@
-const { execFile } = require('child_process');
-const util = require('util');
-const path = require('path');
+const path = require("path");
+const { runPythonJson } = require("../utils/run");
 
-const execFilePromise = util.promisify(execFile);
+const SCRIPT = path.join(__dirname, "../../python/trending.py");
 
 async function getTrending() {
-  const scriptPath = path.join(
-    __dirname,
-    '../../python/trending.py'
-  );
-
-  const { stdout } = await execFilePromise('python', [scriptPath], {
-    maxBuffer: 1024 * 1024 * 5,
-  });
-
-  return JSON.parse(stdout.trim());
+  return runPythonJson(SCRIPT, []);
 }
 
-module.exports = {
-  getTrending,
-};
+module.exports = { getTrending };
