@@ -4,6 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const routes = require("./routes");
 const apiLimiter = require("./middleware/rateLimiter");
+const { getReadiness } = require("./utils/ready");
 const { notFound, errorHandler } = require("./middleware/errorHandler");
 const app = express();
 
@@ -29,6 +30,16 @@ app.get("/api/health", (req, res) => {
     uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
+});
+
+// Readiness: are python/ytmusicapi/yt-dlp available? (memoised 60 s, exempt from rate limit)
+app.get("/api/ready", async (req, res, next) => {
+  try {
+    const r = await getReadiness();
+    res.status(r.ready ? 200 : 503).json(r);
+  } catch (err) {
+    next(err);
+  }
 });
 
 // ✅ Apply the rate limiter to all other /api routes

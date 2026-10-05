@@ -414,7 +414,8 @@ Retrieves the official songs inside a specific album.
 
 
 
-- **Endpoint:** `GET /api/album?title={albumTitle}&artist={artistName}`
+- **Endpoint:** `GET /api/album?albumId={albumId}` (preferred: exact tracklist, `albumId` comes from search results)
+- **Fallback:** `GET /api/album?title={albumTitle}&artist={artistName}` (best-effort song search; may include other releases)
 
 - **Example:** `/api/album?title=Divide&artist=Ed Sheeran`
 
@@ -475,6 +476,27 @@ Retrieves the official songs inside a specific album.
 ---
 
 
+
+# Errors, limits and operations
+
+All errors are JSON `{ "success": false, "error": "..." }` (never HTML or stack traces).
+
+| Status | Meaning |
+|---|---|
+| 400 | Missing/invalid parameter (repeated params, `q` > 200 chars, `videoId` not 11 chars `[A-Za-z0-9_-]`) |
+| 404 | Unknown route, unknown artist, or no playable stream |
+| 413 | Request body over 10 kB |
+| 429 | Rate limited (100 req / 15 min per IP; 60 / 15 min for lookup routes) |
+| 502 | Upstream (ytmusicapi / yt-dlp) failed |
+| 503 / 504 | Process pool queue full / upstream timeout (`PROCESS_TIMEOUT_MS`) |
+
+- `GET /api/ready` reports whether `yt-dlp` and `ytmusicapi` are installed (503 if not). Result memoised for 60 s.
+- `/api/stream/:videoId` returns `{ url, expiresAt }`. URLs are short-lived and tied to the resolving server's IP; clients must re-request on playback error or after `expiresAt`.
+- Configuration: copy `.env.example` to `.env`. Tests: `npm test` (offline, no Python or yt-dlp needed).
+- OpenAPI spec: [docs/openapi.yaml](docs/openapi.yaml). Audit, licensing and roadmap: [docs/](docs/).
+- **Licensing notice:** metadata and stream URLs come from unofficial YouTube tooling and are not a licensed catalogue. See [docs/PROVIDERS_AND_LICENSING.md](docs/PROVIDERS_AND_LICENSING.md) before deploying publicly.
+
+---
 
 # 🛠️ Local Development Setup
 

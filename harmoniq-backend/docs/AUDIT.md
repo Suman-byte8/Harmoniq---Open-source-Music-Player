@@ -44,7 +44,7 @@ Reproduce the injection bug on the original code (`git show HEAD:harmoniq-backen
 - *OS command injection / RCE* – `ytdlpService.js` interpolated the URL param into `exec()` string. Fixed: `videoId` validated against `^[A-Za-z0-9_-]{11}$`, `execFile` (no shell), `--` before the URL. Regression tests included.
 
 **High**
-- *Secrets/artifacts in git (not fixed – needs your decision)*: `.env` (currently empty), `data/harmoniq.db` (empty) and **1,108 `node_modules` files** are tracked despite `.gitignore`. Because `.gitignore` ignores `*.json`, newly added JSON (e.g. future OpenAPI file, tsconfig) will silently be untracked too. Run when ready: `git rm -r --cached harmoniq-backend/node_modules harmoniq-backend/.env harmoniq-backend/data/harmoniq.db`; if `.env` ever held a real key, rotate it (history keeps it). I did not alter the index.
+- *Secrets/artifacts in git (fixed in a follow-up commit: untracked, history not rewritten)*: `.env` (currently empty), `data/harmoniq.db` (empty) and **1,108 `node_modules` files** are tracked despite `.gitignore`. Because `.gitignore` ignores `*.json`, newly added JSON (e.g. future OpenAPI file, tsconfig) will silently be untracked too. Run when ready: `git rm -r --cached harmoniq-backend/node_modules harmoniq-backend/.env harmoniq-backend/data/harmoniq.db`; if `.env` ever held a real key, rotate it (history keeps it). I did not alter the index.
 - *Production dependency CVEs (fixed)*: `npm audit fix` cleared body-parser, qs, morgan, ip-address; `npm audit --omit=dev` = 0. 3 remaining highs are dev-only (nodemon tree).
 
 **Medium (fixed)**
@@ -73,11 +73,11 @@ Not tested: actual audio playback, buffering, seek, mobile browsers (no client i
 ## G. Test summary
 
 - Endpoints discovered: 7 (incl. health, unknown-route handler). Tested live: 7. Tested automatically: 7.
-- Automated: **42 passed, 0 failed, 0 skipped** (`npm test`, ~1.5 s, no network needed).
+- Automated: **46 passed, 0 failed, 0 skipped** (`npm test`, ~1.5 s, no network needed).
 - Live post-fix verification: search, trending, artist (found / not found), album, stream (real yt-dlp), injection attempt, bad JSON, repeated params all behaved as expected.
 - Bugs fixed: 9 (RCE; stack leak; array param 500; artist 200-empty; empty-stream cached as success; cache maxKeys 500s; album cache-key collision; python `IndexError` on empty `artists`/`thumbnails`; prod CVEs). Plus hardening: timeouts, concurrency pool, stricter limiter, body limit, graceful shutdown, 404 JSON.
-- Regression tests added: 42 (see `tests/`).
-- Remaining known issues: tracked `node_modules`/`.env`/db; YouTube licensing/ToS exposure; album endpoint accuracy; no OpenAPI, no accounts/playlists, no readiness probe that checks python/yt-dlp; yt-dlp breaks when YouTube changes (keep it updated); readme still describes the pre-fix behaviour (error codes) and should be updated.
+- Regression tests added: 46 (see `tests/`).
+- Remaining known issues: YouTube licensing/ToS exposure (decision needed); no accounts/playlists/history/lyrics; per-request Python spawn latency on cache misses; yt-dlp breaks when YouTube changes (keep it updated); `/api/ready` added after the original 7-route count (8 routes now).
 
 ## H. Developer handover
 

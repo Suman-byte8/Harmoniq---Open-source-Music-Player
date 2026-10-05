@@ -33,6 +33,27 @@ describe("GET /api/health", () => {
   });
 });
 
+describe("GET /api/ready", () => {
+  const { _reset } = require("../src/utils/ready");
+  test("200 when both tools respond; spawns no shell", async () => {
+    _reset();
+    h.stub(() => "1.2.3");
+    const r = await api.get("/api/ready");
+    assert.equal(r.status, 200);
+    assert.equal(r.json.ready, true);
+  });
+  test("503 when a tool is missing, result memoised", async () => {
+    _reset();
+    h.stub(() => Promise.reject(Object.assign(new Error("x"), { code: "ENOENT" })));
+    const r = await api.get("/api/ready");
+    assert.equal(r.status, 503);
+    assert.equal(r.json.checks.ytdlp.detail, "not installed");
+    const n = h.calls.length;
+    await api.get("/api/ready");
+    assert.equal(h.calls.length, n);
+  });
+});
+
 describe("GET /api/search", () => {
   test("200 and caches second call (query normalised)", async () => {
     h.stub(() => [SONG]);
@@ -152,6 +173,18 @@ describe("GET /api/album", () => {
   test("502 on upstream error", async () => {
     h.stub(() => ({ error: "nope" }));
     assert.equal((await api.get("/api/album?title=a&artist=b")).status, 502);
+  });
+  test("albumId uses exact lookup (--id) and is cached separately", async () => {
+    h.stub(() => ({ albumId: "MPREb_x", title: "P", tracks: [] }));
+    const r = await api.get("/api/album?albumId=MPREb_x");
+    assert.equal(r.status, 200);
+    assert.deepEqual(h.calls[0].args.slice(1), ["--id", "MPREb_x"]);
+    assert.equal((await api.get("/api/album?albumId=MPREb_x")).json.cached, true);
+  });
+  test("invalid or repeated albumId is 400", async () => {
+    assert.equal((await api.get("/api/album?albumId=a%20b%3B")).status, 400);
+    assert.equal((await api.get("/api/album?albumId=a&albumId=b")).status, 400);
+    assert.equal((await api.get("/api/album?albumId=")).status, 400);
   });
 });
 

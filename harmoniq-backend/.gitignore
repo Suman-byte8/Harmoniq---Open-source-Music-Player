@@ -1,7 +1,9 @@
 node_modules/
 .env
 __pycache__/
-*.json
-!package.json
-!package-lock.json
+*.db
+# ytmusicapi credential files (never used by this backend, never commit them)
+oauth.json
+browser.json
+headers_auth.json
 /test

@@ -6,14 +6,14 @@ Complexity: S ≤ half-day, M ≤ 2 days, L > 2 days.
 | Item | Status | Verify |
 |---|---|---|
 | Shell injection in stream route | **Done** | `npm test` (SECURITY regression) |
-| Untrack `node_modules`, `.env`, `data/*.db`; fix `*.json` ignore rule; rotate any key that ever lived in `.env` history | **Open (S)** – needs your OK to touch the git index | `git ls-files | grep node_modules` empty |
+| Untrack `node_modules`, `.env`, `data/*.db`; fix `*.json` ignore rule; rotate any key that ever lived in `.env` history | **Done** – untracked, `.gitignore` fixed (`*.json` rule replaced by explicit credential files). History still contains them; rotate any real key | `git ls-files | grep node_modules` empty |
 | Decide YouTube/yt-dlp legality posture (see PROVIDERS_AND_LICENSING.md) | **Open – decision** | written policy; README wording |
 
 ## P1 – broken core
 | Item | Status |
 |---|---|
 | Input validation, JSON errors, no stack leaks, 404 for unknown artist, empty-stream handling | **Done** |
-| Album accuracy: `album.py` text-searches songs, so tracks can belong to other releases. Use `get_album(browseId)` (works without auth for public albums – verify with current ytmusicapi) and pass `albumId` from search results (M) |
+| **Done**: `GET /api/album?albumId=` uses `get_album` (verified live, unauthenticated); title+artist kept as fallback. Frontend should pass `albumId` from search results |
 | Frontend: re-resolve stream URL on error/expiry, ignore stale responses when skipping (M, client work) |
 
 ## P2 – reliability / performance
@@ -21,9 +21,9 @@ Complexity: S ≤ half-day, M ≤ 2 days, L > 2 days.
 |---|---|
 | Process pool, timeouts, queue-full 503, in-flight dedupe, TTL tied to URL expiry, graceful shutdown, tighter limiter | **Done** |
 | Replace per-request Python spawn (~1.7–3.9 s on a miss) with a long-lived Python worker or a Node port of the used endpoints (M-L); only if cold-miss latency matters – cache hits are ~3 ms |
-| `/api/ready` that runs `yt-dlp --version` and a ytmusicapi smoke call, cached 60 s; pin and auto-update yt-dlp in the deploy (S) |
+| **Done**: `/api/ready`. Still open: pin/auto-update yt-dlp in the deploy |
 | Persistent cache (SQLite via the existing `data/` slot) so restarts do not cold-start; skip Redis until >1 instance (M) |
-| Update README error codes and `.env` docs; OpenAPI spec (`openapi.yaml`; note `.gitignore` ignores `*.json`) (S) |
+| **Done**: README updated, `docs/openapi.yaml` added |
 
 ## P3 – features, by value ÷ effort
 1. Provider abstraction + at least one legal provider (Jamendo or Internet Archive) (L) – prerequisite for a store-safe product.

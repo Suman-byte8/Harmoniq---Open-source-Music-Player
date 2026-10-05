@@ -33,4 +33,11 @@ function videoIdParam(value) {
   return value;
 }
 
-module.exports = { HttpError, stringParam, videoIdParam, MAX_QUERY_LENGTH };
+function albumIdParam(value) {
+  if (typeof value !== "string" || !/^[A-Za-z0-9_-]{1,64}$/.test(value)) {
+    throw new HttpError(400, "albumId is invalid");
+  }
+  return value;
+}
+
+module.exports = { HttpError, stringParam, videoIdParam, albumIdParam, MAX_QUERY_LENGTH };

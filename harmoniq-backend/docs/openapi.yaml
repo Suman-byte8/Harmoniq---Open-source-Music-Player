@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: Harmoniq API
+  version: 1.0.0
+  description: >
+    Metadata and playable-URL API. Audio bytes are served by the upstream CDN, not this API.
+    All errors are JSON: {"success": false, "error": "..."}.
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/health:
+    get:
+      summary: Liveness
+      responses:
+        "200": { description: Server is up }
+  /api/ready:
+    get:
+      summary: Readiness (python/ytmusicapi/yt-dlp present). Memoised 60 s, not rate limited.
+      responses:
+        "200": { description: All tools available }
+        "503": { description: A tool is missing }
+  /api/search:
+    get:
+      summary: Search songs
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, maxLength: 200 } }
+      responses:
+        "200": { description: Up to 8 tracks }
+        "400": { description: q missing, repeated or too long }
+        "429": { description: Rate limited }
+        "502": { description: Upstream provider failed }
+        "503": { description: Server busy }
+        "504": { description: Upstream timeout }
+  /api/trending:
+    get:
+      summary: Trending songs (cached 30 min)
+      responses:
+        "200": { description: Up to 10 tracks }
+        "502": { description: Upstream provider failed }
+  /api/artist:
+    get:
+      summary: Artist profile with top songs and albums
+      parameters:
+        - { name: name, in: query, required: true, schema: { type: string, maxLength: 200 } }
+      responses:
+        "200": { description: Artist }
+        "400": { description: Invalid name }
+        "404": { description: Artist not found }
+        "502": { description: Upstream provider failed }
+  /api/album:
+    get:
+      summary: Album tracklist. Prefer albumId (exact); title+artist is a best-effort search.
+      parameters:
+        - { name: albumId, in: query, required: false, schema: { type: string, pattern: "^[A-Za-z0-9_-]{1,64}$" } }
+        - { name: title, in: query, required: false, schema: { type: string } }
+        - { name: artist, in: query, required: false, schema: { type: string } }
+      responses:
+        "200": { description: Album }
+        "400": { description: Invalid or missing parameters }
+        "502": { description: Upstream provider failed }
+  /api/stream/{videoId}:
+    get:
+      summary: Resolve a short-lived direct audio URL
+      description: Re-request on playback error (403/410) or after expiresAt.
+      parameters:
+        - { name: videoId, in: path, required: true, schema: { type: string, pattern: "^[A-Za-z0-9_-]{11}$" } }
+      responses:
+        "200":
+          description: Stream URL
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  cached: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      url: { type: string }
+                      expiresAt: { type: string, format: date-time, nullable: true }
+        "400": { description: Invalid videoId }
+        "404": { description: No playable stream }
+        "502": { description: Upstream provider failed }
+        "504": { description: Upstream timeout }
