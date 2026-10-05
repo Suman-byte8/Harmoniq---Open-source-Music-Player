@@ -1,4 +1,6 @@
+const path = require("path");
 const { execFile } = require("child_process");
+const PyWorker = require("./pyworker");
 
 // Every metadata/stream lookup spawns a process. Bound how many run at once and
 // how long each may take so a burst of requests cannot exhaust the host.
@@ -62,13 +64,49 @@ async function run(file, args, opts = {}) {
   }
 }
 
-async function runPythonJson(script, args) {
-  const stdout = await run(PYTHON, [script, ...args]);
+const PY_DIR = path.join(__dirname, "../../python");
+const SCRIPTS = {
+  search: "search_music.py",
+  trending: "trending.py",
+  artist: "artist.py",
+  album: "album.py",
+};
+
+// PYTHON_WORKER=false falls back to one process per call (slower, but simplest to debug).
+const USE_WORKER = process.env.PYTHON_WORKER !== "false";
+let worker = null;
+function getWorker() {
+  if (!worker) {
+    worker = new PyWorker({
+      command: PYTHON,
+      args: ["-u", path.join(PY_DIR, "worker.py")],
+      cwd: PY_DIR,
+      timeoutMs: TIMEOUT_MS,
+    });
+  }
+  return worker;
+}
+
+// cmd: search | trending | artist | album. Result is parsed JSON.
+async function runPythonJson(cmd, args) {
+  if (!USE_WORKER) {
+    const stdout = await run(PYTHON, [path.join(PY_DIR, SCRIPTS[cmd]), ...args]);
+    try {
+      return JSON.parse(stdout.trim());
+    } catch {
+      throw new Error("Upstream script returned invalid JSON");
+    }
+  }
+  await acquire();
   try {
-    return JSON.parse(stdout.trim());
-  } catch {
-    throw new Error("Upstream script returned invalid JSON");
+    return await getWorker().call(cmd, args);
+  } finally {
+    release();
   }
 }
 
-module.exports = { run, runPythonJson, exec, YTDLP, BusyError };
+function stopWorker() {
+  if (worker) worker.stop();
+}
+
+module.exports = { run, runPythonJson, stopWorker, exec, YTDLP, BusyError };

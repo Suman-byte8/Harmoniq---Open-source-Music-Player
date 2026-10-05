@@ -490,6 +490,7 @@ All errors are JSON `{ "success": false, "error": "..." }` (never HTML or stack 
 | 502 | Upstream (ytmusicapi / yt-dlp) failed |
 | 503 / 504 | Process pool queue full / upstream timeout (`PROCESS_TIMEOUT_MS`) |
 
+- **Performance:** metadata calls go through one long-lived Python worker (`python/worker.py`, set `PYTHON_WORKER=false` to disable); trending is pre-warmed at boot and every 25 min (`WARM_CACHE=false` to disable) and served stale-while-revalidate; responses are gzipped. On free hosts that sleep (Render), ping `/api/health` every ~10 min to avoid cold starts.
 - `GET /api/ready` reports whether `yt-dlp` and `ytmusicapi` are installed (503 if not). Result memoised for 60 s.
 - `/api/stream/:videoId` returns `{ url, expiresAt }`. URLs are short-lived and tied to the resolving server's IP; clients must re-request on playback error or after `expiresAt`.
 - Configuration: copy `.env.example` to `.env`. Tests: `npm test` (offline, no Python or yt-dlp needed).

@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
+const compression = require("compression");
 const morgan = require("morgan");
 const routes = require("./routes");
 const apiLimiter = require("./middleware/rateLimiter");
@@ -13,6 +14,7 @@ const app = express();
 app.set("trust proxy", 1);
 
 app.use(helmet());
+app.use(compression());
 // CORS_ORIGIN: comma-separated allowlist; unset = allow any origin (public read-only API).
 const origins = (process.env.CORS_ORIGIN || "").split(",").map((o) => o.trim()).filter(Boolean);
 app.use(cors(origins.length ? { origin: origins } : undefined));

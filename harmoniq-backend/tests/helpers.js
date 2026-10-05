@@ -2,6 +2,7 @@
 // child-process layer (python / yt-dlp) with a programmable stub, so tests need no
 // network, Python, or yt-dlp.
 process.env.NODE_ENV = "test";
+process.env.PYTHON_WORKER = "false"; // API tests stub execFile; the worker has its own tests
 const { exec } = require("../src/utils/run");
 const app = require("../src/app");
 const cache = require("../src/config/cache");

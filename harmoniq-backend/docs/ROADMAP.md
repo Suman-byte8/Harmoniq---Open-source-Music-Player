@@ -20,7 +20,8 @@ Complexity: S ≤ half-day, M ≤ 2 days, L > 2 days.
 | Item | Status |
 |---|---|
 | Process pool, timeouts, queue-full 503, in-flight dedupe, TTL tied to URL expiry, graceful shutdown, tighter limiter | **Done** |
-| Replace per-request Python spawn (~1.7–3.9 s on a miss) with a long-lived Python worker or a Node port of the used endpoints (M-L); only if cold-miss latency matters – cache hits are ~3 ms |
+| **Done**: long-lived Python worker with pooled clients, parallel artist/trending lookups, stale-while-revalidate + boot/25-min trending warm-up, gzip. Measured live (local machine): search miss 2.3 s → 0.5 s, artist 3.9 s → 1.1 s, album-by-id ≈ 0.4 s, trending 2.0 s → 0.02 s; cache hits ≈ 3 ms. Stream (`yt-dlp`) still ≈ 2.6–3.2 s on a miss – unchanged, see next row |
+| Faster stream resolution: `yt-dlp` is spawned per miss; options are a Node-native extractor or prefetching the next track client-side (client work recommended first) |
 | **Done**: `/api/ready`. Still open: pin/auto-update yt-dlp in the deploy |
 | Persistent cache (SQLite via the existing `data/` slot) so restarts do not cold-start; skip Redis until >1 instance (M) |
 | **Done**: README updated, `docs/openapi.yaml` added |

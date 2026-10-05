@@ -106,7 +106,7 @@ describe("GET /api/search", () => {
     assert.equal(h.calls.length, 1);
   });
   test("regression: cache full does not turn into a 500", async () => {
-    for (let i = 0; i < 5000; i++) cache.set("filler" + i, 1);
+    for (let i = 0; i < 10000; i++) cache.set("filler" + i, 1);
     h.stub(() => [SONG]);
     const r = await api.get("/api/search?q=full");
     assert.equal(r.status, 200);
@@ -256,5 +256,33 @@ describe("global behaviour", () => {
   });
   test("POST to GET-only route is 404 (no side effects)", async () => {
     assert.equal((await api.get("/api/trending", { method: "POST" })).status, 404);
+  });
+});
+
+describe("stale-while-revalidate and compression", () => {
+  const cached = require("../src/utils/cached");
+  test("expired entry is served instantly and refreshed in the background", async () => {
+    let n = 0;
+    const loader = async () => ++n;
+    await cached("swr:k", 60, loader, { swr: 600 });
+    cache.del("fresh:swr:k"); // simulate the fresh window ending
+    const r = await cached("swr:k", 60, loader, { swr: 600 });
+    assert.equal(r.value, 1); // stale value, no waiting
+    await new Promise((res) => setTimeout(res, 20));
+    assert.equal((await cached("swr:k", 60, loader, { swr: 600 })).value, 2);
+  });
+  test("failed background refresh keeps serving the stale value", async () => {
+    await cached("swr:f", 60, async () => "old", { swr: 600 });
+    cache.del("fresh:swr:f");
+    const r = await cached("swr:f", 60, async () => { throw new Error("x"); }, { swr: 600 });
+    assert.equal(r.value, "old");
+    await new Promise((res) => setTimeout(res, 20));
+    assert.equal(cache.get("swr:f"), "old");
+  });
+  test("large JSON responses are gzipped when the client accepts it", async () => {
+    h.stub(() => Array.from({ length: 50 }, (_, i) => ({ ...SONG, videoId: "v" + i, title: "t".repeat(60) })));
+    const res = await fetch(api.base + "/api/search?q=gz", { headers: { "accept-encoding": "gzip" } });
+    assert.equal(res.headers.get("content-encoding"), "gzip");
+    assert.equal((await res.json()).success, true);
   });
 });
